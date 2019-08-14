@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <name>Sitewards_B2BProfessional</name>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
     <stability>stable</stability>
     <license uri="http://www.opensource.org/licenses/gpl-license.php">GPL</license>
     <channel>community</channel>
@@ -20,11 +20,11 @@ Features of the B2BProfessional Extension:&#xD;
 &#xB7; Activation for specific product categories&#xD;
 &#xB7; Activation for specific customer groups&#xD;
 &#xB7; Optional require login to access store</description>
-    <notes>Fix compatibility issues with Simple Configurable Product and other extension.</notes>
+    <notes>Remove the price range from search pages when customer is not active.</notes>
     <authors><author><name>Sitewards Magento Team</name><user>sitewards</user><email>magento@sitewards.com</email></author></authors>
-    <date>2013-03-20</date>
-    <time>08:59:48</time>
-    <contents><target name="magecommunity"><dir name="Sitewards"><dir name="B2BProfessional"><dir name="Block"><dir name="Bundle"><dir name="Catalog"><file name="Price.php" hash="29947f4d2db1edb62d31ab2bb26d5612"/><dir name="Product"><dir name="View"><dir name="Type"><dir name="Bundle"><dir name="Option"><file name="Checkbox.php" hash="97e3e7ce97a873c0bf438dcbb9d63538"/><file name="Multi.php" hash="aade197dae894c11df15ded6b90c5fa6"/><file name="Radio.php" hash="6bae85356183c20b8f7327018f4939fe"/><file name="Select.php" hash="b90a778084796edf552d6c87e888404f"/></dir></dir></dir></dir></dir></dir></dir></dir><dir name="Helper"><file name="Data.php" hash="fb54bbbba61ef5e564bfcad9a03c6a67"/></dir><dir name="Model"><file name="Customer.php" hash="965cddbd586db90e693e7cef0bfba762"/><file name="Observer.php" hash="2b827f5994c1f039af6aaa159eddc2db"/><dir name="System"><dir name="Config"><dir name="Source"><file name="Category.php" hash="115526ef80ee1f799e0c68f81a45fc9f"/><file name="Page.php" hash="042ef4e679e8e8c7b6a2c696119712b3"/></dir></dir></dir></dir><dir name="controllers"><file name="CartController.php" hash="6dfb9530a9361dd2636ce5229369de3c"/></dir><dir name="etc"><file name="adminhtml.xml" hash="4532de80b3439c3047ea70776b8420a5"/><file name="config.xml" hash="96b94503af0182a916359ff46c4f6b31"/><file name="system.xml" hash="61633ee9a60e9dd3158df36616804e5f"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Sitewards_B2BProfessional.xml" hash="3eb7e7a0f796d39faf60cf3f30c40ff2"/></dir></target><target name="magelocale"><dir name="de_DE"><file name="Sitewards_B2BProfessional.csv" hash="26108c182a96d9f4eb1df05f379105f7"/></dir><dir name="en_US"><file name="Sitewards_B2BProfessional.csv" hash="5b6a370b2c2790ff1cb3954b8180ff81"/></dir></target></contents>
+    <date>2013-03-22</date>
+    <time>09:35:42</time>
+    <contents><target name="magecommunity"><dir name="Sitewards"><dir name="B2BProfessional"><dir name="Block"><dir name="Bundle"><dir name="Catalog"><file name="Price.php" hash="29947f4d2db1edb62d31ab2bb26d5612"/><dir name="Product"><dir name="View"><dir name="Type"><dir name="Bundle"><dir name="Option"><file name="Checkbox.php" hash="97e3e7ce97a873c0bf438dcbb9d63538"/><file name="Multi.php" hash="aade197dae894c11df15ded6b90c5fa6"/><file name="Radio.php" hash="6bae85356183c20b8f7327018f4939fe"/><file name="Select.php" hash="b90a778084796edf552d6c87e888404f"/></dir></dir></dir></dir></dir></dir></dir></dir><dir name="Helper"><file name="Data.php" hash="248dd96fca4157eb7af8a25ff6f08478"/></dir><dir name="Model"><file name="Customer.php" hash="5b78023593622c28dc6ee1b02d89aa26"/><file name="Observer.php" hash="cb547c37164c243a179458ebd48b118a"/><dir name="System"><dir name="Config"><dir name="Source"><file name="Category.php" hash="115526ef80ee1f799e0c68f81a45fc9f"/><file name="Page.php" hash="042ef4e679e8e8c7b6a2c696119712b3"/></dir></dir></dir></dir><dir name="controllers"><file name="CartController.php" hash="6dfb9530a9361dd2636ce5229369de3c"/></dir><dir name="etc"><file name="adminhtml.xml" hash="4532de80b3439c3047ea70776b8420a5"/><file name="config.xml" hash="13fe487a043b4559cb3da1d912862f2d"/><file name="system.xml" hash="61633ee9a60e9dd3158df36616804e5f"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Sitewards_B2BProfessional.xml" hash="3eb7e7a0f796d39faf60cf3f30c40ff2"/></dir></target><target name="magelocale"><dir name="de_DE"><file name="Sitewards_B2BProfessional.csv" hash="26108c182a96d9f4eb1df05f379105f7"/></dir><dir name="en_US"><file name="Sitewards_B2BProfessional.csv" hash="5b6a370b2c2790ff1cb3954b8180ff81"/></dir></target></contents>
     <compatible/>
     <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php><package><name>Netzarbeiter_CustomerActivation</name><channel>community</channel><min>0.3.0</min><max>0.4.1</max></package></required></dependencies>
 </package>
