@@ -5,7 +5,7 @@
  *
  * @category    Sitewards
  * @package     Sitewards_B2BProfessional
- * @copyright   Copyright (c) 2012 Sitewards GmbH (http://www.sitewards.com/)
+ * @copyright   Copyright (c) 2013 Sitewards GmbH (http://www.sitewards.com/)
  */
 require_once 'Mage/Checkout/controllers/CartController.php';
 class Sitewards_B2BProfessional_CartController extends Mage_Checkout_CartController {
@@ -29,17 +29,20 @@ class Sitewards_B2BProfessional_CartController extends Mage_Checkout_CartControl
 		if (!empty($aMultiProducts)) {
 			foreach ($aMultiProducts as $iMultiProductId => $iMultiProductValue) {
 				if ($iMultiProductValue > 0) {
-					if ($oB2BHelper->checkActive($iMultiProductId)) {
+					if ($oB2BHelper->isProductActive($iMultiProductId)) {
 						$bAllowed = false;
 					}
 				}
 			}
 		}
 
-		if ((!empty($iProductId) && $oB2BHelper->checkActive($iProductId)) || ! $bAllowed) {
+		if ((!empty($iProductId) && $oB2BHelper->isProductActive($iProductId)) || ! $bAllowed) {
+			/* @var $oB2BMessagesHelper Sitewards_B2BProfessional_Helper_Messages */
+			$oB2BMessagesHelper = Mage::helper('b2bprofessional/messages');
+
 			$this->setFlag('', 'no-dispatch', true);
-			Mage::getSingleton('customer/session')->addError($oB2BHelper->getCheckoutMessage());
-			Mage::app()->getResponse()->setRedirect(Mage::getUrl('customer/account/login'))->sendHeaders();
+			Mage::getSingleton('customer/session')->addError($oB2BMessagesHelper->getMessage($oB2BMessagesHelper::MESSAGE_TYPE_CHECKOUT));
+			Mage::app()->getResponse()->setRedirect(Sitewards_B2BProfessional_Helper_Redirects::getRedirect(Sitewards_B2BProfessional_Helper_Redirects::REDIRECT_TYPE_ADD_TO_CART))->sendHeaders();
 		}
 	}
 }

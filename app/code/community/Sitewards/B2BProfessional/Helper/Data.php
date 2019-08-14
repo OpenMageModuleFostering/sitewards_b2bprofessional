@@ -12,212 +12,86 @@
  *
  * @category    Sitewards
  * @package     Sitewards_B2BProfessional
- * @copyright   Copyright (c) 2012 Sitewards GmbH (http://www.sitewards.com/)
+ * @copyright   Copyright (c) 2013 Sitewards GmbH (http://www.sitewards.com/)
  */
 class Sitewards_B2BProfessional_Helper_Data extends Mage_Core_Helper_Abstract {
 	/**
-	 * Regular expression for replacements
-	 */
-	const PATTERN_BASE = '@<%1$s %2$s="%3$s"[^>]*?>.*?</%1$s>@siu';
-
-	/**
-	 * Check to see if the website is set-up to require a user login to view pages
+	 * Object for the sitewards b2bprofessional category helper
 	 *
-	 * @return boolean
+	 * @var Sitewards_B2BProfessional_Helper_Category
 	 */
-	public function checkRequireLogin() {
-		return Mage::getStoreConfigFlag('b2bprofessional/generalsettings/requirelogin');
+	protected $oB2BCategoryHelper;
+
+	/**
+	 * Object for the sitewards b2bprofessional customer helper
+	 *
+	 * @var Sitewards_B2BProfessional_Helper_Customer
+	 */
+	protected $oB2BCustomerHelper;
+
+	/**
+	 * Create instances of the sitewards b2bprofessional category and customer helpers
+	 */
+	protected function _prepareHelpers() {
+		/** @var $this->oB2BCategoryHelper Sitewards_B2BProfessional_Helper_Category */
+		$this->oB2BCategoryHelper = Mage::helper('b2bprofessional/category');
+		/** @var $this->oB2BCustomerHelper Sitewards_B2BProfessional_Helper_Customer */
+		$this->oB2BCustomerHelper = Mage::helper('b2bprofessional/customer');
 	}
 
 	/**
-	 * Check to see if the user is allowed on the current store
-	 * 
-	 * @return boolean
+	 * Check to see if the extension is active
+	 * Returns the extension's general setting "active"
+	 *
+	 * @return bool
 	 */
-	public function checkAllowed() {
-		// if option is not active return true!
-		if (Mage::getStoreConfig('b2bprofessional/generalsettings/activecustomers')) {
-			return true;
-		}
-
-		$bCreatedViaAdmin = false;
-		$oCustomer = Mage::getSingleton('customer/session')->getCustomer();
-		if($oCustomer->getCreatedIn() == 'Admin') {
-			$bCreatedViaAdmin = true;
-		}
-		$iUserStoreId		= $oCustomer->getStoreId();
-		$iCurrentStoreId	= Mage::app()->getStore()->getId();
-
-		if ($iUserStoreId == $iCurrentStoreId || $bCreatedViaAdmin == true) {
-			return true;
-		}
+	public function isExtensionActive() {
+		return Mage::getStoreConfigFlag(Sitewards_B2BProfessional_Helper_Core::CONFIG_B2B_PROFESSIONAL_NODE . '/' . Sitewards_B2BProfessional_Helper_Core::CONFIG_GENERAL_SETTINGS_NODE . '/active');
 	}
 
 	/**
-	 * Validate that the category of a give product is activated in the module
-	 * 
+	 * Check that the price can be displayed for the given product id
+	 *  - Check that the extension is active
+	 *  - Check that the customer is allowed in the store
+	 *  - When the extension is activated by customer group and category
+	 *   - Check that:
+	 *    - The category is active by product
+	 *    - AND The customer is active
+	 *  - When the extension is activated by customer group
+	 *   - Check that:
+	 *    - The customer is active
+	 *  - When the extension is activated by category
+	 *   - Check that:
+	 *    - The category is active by product
+	 *    - AND the user is not logged in
+	 *  - Else
+	 *   - Check if the user is not logged in
+	 *
 	 * @param int $iProductId
-	 * @return boolean
+	 * @return bool
 	 */
-	public function checkCategoryIsActive($iProductId = null) {
-		$aCurrentCategories = array ();
-
-		// activate by category
-		if ($iProductId !== null) {
-			/* @var $oProduct Mage_Catalog_Model_Product */
-			$oProduct = Mage::getModel('catalog/product')->load($iProductId);
-			$aParentProductIds = $oProduct->loadParentProductIds()->getData('parent_product_ids');
-			if (!empty($aParentProductIds) && $oProduct->isGrouped()) {
-				foreach ($aParentProductIds as $iParentProductId) {
-					/* @var $oParentProduct Mage_Catalog_Model_Product */
-					$oParentProduct = Mage::getModel('catalog/product')->load($iParentProductId);
-					$aParentProductCategories = $oParentProduct->getCategoryIds();
-					$aCurrentCategories = array_merge($aCurrentCategories, $aParentProductCategories);
-				}
-			} else {
-				$aCurrentCategories = $oProduct->getCategoryIds();
-			}
-		} else {
-			/*
-			 * Check if there is a filtered category
-			 * 	- If not check for a current_category,
-			 * 		- If not load the store default category,
-			 */
-			$aB2BProfFilters = Mage::registry('b2bprof_category_filters');
-			if(empty($aB2BProfFilters)) {
-				/* @var $oCategory Mage_Catalog_Model_Category */
-				$oCategory = Mage::registry('current_category_filter');
-				if(is_null($oCategory)) {
-					$oCategory = Mage::registry('current_category');
-					if(is_null($oCategory)) {
-						$oCategory = Mage::getModel('catalog/category')->load(Mage::app()->getStore()->getRootCategoryId());
-					}
-				}
-				$aCurrentCategories = $oCategory->getAllChildren(true);
-				$aCurrentCategories[] = $oCategory->getId();
-			} else {
-				$aCurrentCategories = $aB2BProfFilters;
-				foreach($aB2BProfFilters as $iCategoryId) {
-					$oCategory = Mage::getModel('catalog/category')->load($iCategoryId);
-
-					$aCurrentCategories = array_merge($aCurrentCategories, $oCategory->getAllChildren(true));
-				}
-			}
-		}
-		$aCurrentCategories = array_unique($aCurrentCategories);
-
-		$aActiveCategories = $this->getActiveCategories();
-		if (!is_array($aCurrentCategories)) {
-			$aCurrentCategories = array (
-				$aCurrentCategories
-			);
-		}
-		$bActive = false;
-		foreach ($aCurrentCategories as $iCategoryId) {
-			if (in_array($iCategoryId, $aActiveCategories)) {
-				$bActive = true;
-			}
-		}
-		return $bActive;
-	}
-
-	/**
-	 * Check that the current customer has an active group id
-	 * 
-	 * @return boolean
-	 */
-	public function checkCustomerIsActive() {
-		// activate by customer group
-		/* @var $oCustomerSession Mage_Customer_Model_Session */
-		$oCustomerSession = Mage::getModel('customer/session');
-		$iCurrentCustomerGroupId = $oCustomerSession->getCustomerGroupId();
-		$aActiveCustomerGroupIds = explode(',', Mage::getStoreConfig('b2bprofessional/activatebycustomersettings/activecustomers'));
-
-		/*
-		 * Always add the guest user when activated by customer group
-		 * Note: the the group code for the guest user can not be changed via the admin section 
-		 */
-		$iGuestGroupId = Mage::getModel('customer/group')->load('NOT LOGGED IN', 'customer_group_code')->getId();
-		$aActiveCustomerGroupIds[] = $iGuestGroupId;
-
-		if (in_array($iCurrentCustomerGroupId, $aActiveCustomerGroupIds)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Check the global active flag
-	 * 
-	 * @return boolean
-	 */
-	public function checkGlobalActive() {
-		if (Mage::getStoreConfig('b2bprofessional/generalsettings/active') == 1) {
-			return true;
-		}
-	}
-
-	/**
-	 * Check that a customer is logged in,
-	 * 	- If they are logged in validate their account usint the checkAllowed function
-	 * 
-	 * @return boolean
-	 */
-	public function checkLoggedIn() {
-		$bLoggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
-
-		if (!$this->checkAllowed()) {
-			$bLoggedIn = false;
-		}
-		return $bLoggedIn;
-	}
-
-	/**
-	 * Check that the product/customer is activated
-	 * 
-	 * @param int $iProductId
-	 * @return boolean
-	 */
-	public function checkActive($iProductId = null) {
+	public function isProductActive($iProductId) {
 		$bIsLoggedIn = false;
 		// global extension activation
-		if ($this->checkGlobalActive()) {
+		if ($this->isExtensionActive()) {
+			$this->_prepareHelpers();
+
 			// check user logged in and has store access
-			if ($this->checkLoggedIn()) {
+			if ($this->oB2BCustomerHelper->isCustomerAllowedInStore()) {
 				$bIsLoggedIn = true;
 			}
 
-			$bCheckUser = Mage::getStoreConfigFlag('b2bprofessional/activatebycustomersettings/activebycustomer');
-			$bCheckCategory = Mage::getStoreConfigFlag('b2bprofessional/activatebycategorysettings/activebycategory');
+			$bCheckUser		= $this->oB2BCustomerHelper->isExtensionActivatedByCustomer();
+			$bCheckCategory	= $this->oB2BCategoryHelper->isExtensionActivatedByCategory();
 
 			if($bCheckUser == true && $bCheckCategory == true) {
-				// check both the category and customer group is active via the extension
-				if ($this->checkCategoryIsActive($iProductId) && $this->checkCustomerIsActive()) {
-					$bIsActive = true;
-				} else {
-					$bIsActive = false;
-				}
+				$bIsActive = $this->oB2BCategoryHelper->isCategoryActiveByProduct($iProductId) && $this->oB2BCustomerHelper->isCustomerActive();
 			} elseif($bCheckUser == true) {
-				// check user group is active via the extension
-				if ($this->checkCustomerIsActive()) {
-					$bIsActive = true;
-				} else {
-					$bIsActive = false;
-				}
+				$bIsActive = $this->oB2BCustomerHelper->isCustomerActive();
 			} elseif ($bCheckCategory == true) {
-				// check category is active via the extension
-				if (!$this->checkCategoryIsActive($iProductId) || $bIsLoggedIn == true) {
-					$bIsActive = false;
-				} else {
-					$bIsActive = true;
-				}
+				$bIsActive = $this->oB2BCategoryHelper->isCategoryActiveByProduct($iProductId) && !$bIsLoggedIn;
 			} else {
-				if ($bIsLoggedIn == false) {
-					$bIsActive = true;
-				} else {
-					$bIsActive = false;
-				}
+				$bIsActive = !$bIsLoggedIn;
 			}
 		} else {
 			$bIsActive = false;
@@ -226,77 +100,52 @@ class Sitewards_B2BProfessional_Helper_Data extends Mage_Core_Helper_Abstract {
 	}
 
 	/**
-	 * Get all active categories
-	 * 	- allow for sub categories also
-	 * @param boolean $bIncludeSubCategories
-	 * @return array
-	 * 	array(
-	 * 		cat_id_1,
-	 * 		cat_id_2
-	 * 	)
-	 */
-	public function getActiveCategories($bIncludeSubCategories = true) {
-		$aCurrentActiveCategories = explode(',', Mage::getStoreConfig('b2bprofessional/activatebycategorysettings/activecategories'));
-		if($bIncludeSubCategories == false) {
-			return $aCurrentActiveCategories;
-		}
-
-		$aSubActiveCategories = array();
-		foreach ($aCurrentActiveCategories as $iCategoryId) {
-			$aSubActiveCategories = $this->addCategoryChildren($iCategoryId, $aSubActiveCategories);
-		}
-		return array_unique($aSubActiveCategories);
-	}
-
-	/**
-	 * From given category id load all child ids into an array
-	 * 
-	 * @param int $iCategoryId
-	 * @param array $aCurrentCategories
-	 * 	array(
-	 * 		cat_id_1,
-	 * 		cat_id_2
-	 * 	)
-	 * @return array
-	 * 	array(
-	 * 		cat_id_1,
-	 * 		cat_id_2
-	 * 	)
-	 */
-	public function addCategoryChildren($iCategoryId, $aCurrentCategories = array()) {
-		/* @var $oCurrentCategory Mage_Catalog_Model_Category */
-		$oCurrentCategory = Mage::getModel('catalog/category');
-		$oCurrentCategory = $oCurrentCategory->load($iCategoryId);
-		return array_merge($aCurrentCategories, $oCurrentCategory->getAllChildren(true));
-	}
-
-	/**
-	 * Get the require login message
+	 * Check that the price can be displayed when no product id is given
+	 *  - Check that the extension is active
+	 *  - Check that the customer is allowed in the store
+	 *  - When the extension is activated by customer group and category
+	 *   - Check that:
+	 *    - The category is active
+	 *    - AND The customer is active
+	 *  - When the extension is activated by customer group
+	 *   - Check that:
+	 *    - The customer is active
+	 *  - When the extension is activated by category
+	 *   - Check that:
+	 *    - The category is active
+	 *    - AND the user is not logged in
+	 *  - Else
+	 *   - Check if the user not is logged in
 	 *
-	 * @return string
+	 * @return bool
 	 */
-	public function getRequireLoginMessage() {
-		// text displayed instead of price
-		if (Mage::getStoreConfig('b2bprofessional/languagesettings/languageoverride') == 1) {
-			$sLoginMessage = Mage::getStoreConfig('b2bprofessional/languagesettings/requireloginmessage');
+	public function isActive() {
+		$bIsLoggedIn = false;
+		// global extension activation
+		if ($this->isExtensionActive()) {
+			$this->_prepareHelpers();
+
+			// check user logged in and has store access
+			if ($this->oB2BCustomerHelper->isCustomerAllowedInStore()) {
+				$bIsLoggedIn = true;
+			}
+
+			$bCheckUser		= $this->oB2BCustomerHelper->isExtensionActivatedByCustomer();
+			$bCheckCategory	= $this->oB2BCategoryHelper->isExtensionActivatedByCategory();
+
+			if($bCheckUser == true && $bCheckCategory == true) {
+				$bIsActive = $this->oB2BCategoryHelper->isCategoryActive() && $this->oB2BCustomerHelper->isCustomerActive();
+			} elseif($bCheckUser == true) {
+				$bIsActive = $this->oB2BCustomerHelper->isCustomerActive();
+			} elseif ($bCheckCategory == true) {
+				$bIsActive = $this->oB2BCategoryHelper->isCategoryActive() && !$bIsLoggedIn;
+			} else {
+				$bIsActive = !$bIsLoggedIn;
+			}
 		} else {
-			$sLoginMessage = $this->__('You do not have access to view this store.');
+			$bIsActive = false;
 		}
-		return $sLoginMessage;
-	}
-
-	/**
-	 * Get the url of the require login redirect
-	 *
-	 * @return string
-	 */
-	public function getRequireLoginRedirect() {
-		$sRedirectPath = '/';
-		$sConfigVar = Mage::getStoreConfig('b2bprofessional/generalsettings/requireloginredirect');
-		if (isset($sConfigVar)) {
-			$sRedirectPath = $sConfigVar;
-		}
-		return Mage::getUrl($sRedirectPath);
+		return $bIsActive;
 	}
 
 	/**
@@ -315,147 +164,10 @@ class Sitewards_B2BProfessional_Helper_Data extends Mage_Core_Helper_Abstract {
 			/*
 			 * For each item check if it is active for the current user
 			 */
-			if ($this->checkActive($iProductId)) {
+			if ($this->isProductActive($iProductId)) {
 				$bValidCart = false;
 			}
 		}
 		return $bValidCart;
-	}
-
-	/**
-	 * Get the message to replace prices with
-	 *  - Check for admin language override
-	 *
-	 * @return string
-	 */
-	public function getPriceMessage() {
-		// text displayed instead of price
-		if (Mage::getStoreConfig('b2bprofessional/languagesettings/languageoverride') == 1) {
-			$sReplacementText = Mage::getStoreConfig('b2bprofessional/languagesettings/logintext');
-		} else {
-			$sReplacementText = $this->__('Please login');
-		}
-		return $sReplacementText;
-	}
-
-	/**
-	 * * Get the checkout error message
-	 *  - Check for admin language override
-	 *
-	 * @return string
-	 */
-	public function getCheckoutMessage() {
-		if (Mage::getStoreConfig('b2bprofessional/languagesettings/languageoverride') == 1) {
-			$sCheckoutMessage = Mage::getStoreConfig('b2bprofessional/languagesettings/errortext');
-		} else {
-			$sCheckoutMessage = $this->__('Your account is not allowed to access this store.');
-		}
-		return $sCheckoutMessage;
-	}
-
-	/**
-	 * When we have an invalid cart
-	 *  - Perform a preg_replace with a given set of patterns and replacements on a string
-	 *  - When product id is given check for valid product
-	 *  - When no product id is given then check to complete cart
-	 *
-	 * @param array $aPatterns
-	 * @param array $aReplacements
-	 * @param string $sBlockHtml
-	 * @param int $iProductId
-	 * @return string
-	 */
-	public function replaceOnInvalidCart($aPatterns, $aReplacements, $sBlockHtml, $iProductId = null) {
-		/*
-		 * If you have no product id provided and an invalid cart
-		 * OR
-		 * If you have a product id provided and it is invalid
-		 *
-		 * THEN
-		 * Perform the preg_replace
-		 */
-		if (
-			is_null($iProductId) && !$this->hasValidCart()
-			||
-			!is_null($iProductId) && $this->checkActive($iProductId)
-		) {
-			$sBlockHtml = preg_replace(
-				$aPatterns,
-				$aReplacements,
-				$sBlockHtml
-			);
-		}
-		return $sBlockHtml;
-	}
-
-	/**
-	 * From a given config section
-	 *  - Load all the config
-	 *  - remove unused sections
-	 *  - perform a sprintf on given config items
-	 *
-	 * @param string $sConfigSection
-	 * @return string
-	 */
-	public function getPattern($sConfigSection) {
-		// Load config array and unset unused information
-		$aSectionConfig = Mage::getStoreConfig('b2bprofessional/'.$sConfigSection);
-		unset($aSectionConfig['replace']);
-		unset($aSectionConfig['remove']);
-
-		// Replace the tag, id and value sections of the regular expression
-		return sprintf($this::PATTERN_BASE, $aSectionConfig['tag'], $aSectionConfig['id'], $aSectionConfig['value']);
-	}
-
-	/**
-	 * Get replacement text for a given config section
-	 *
-	 * @param string $sConfigSection
-	 * @return string
-	 */
-	public function getReplacement($sConfigSection) {
-		// Check for the remove flag
-		if(!Mage::getStoreConfigFlag('b2bprofessional/'.$sConfigSection.'/remove')) {
-			// If the remove flag is not set then get the module's price message
-			return $this->getPriceMessage();
-		}
-	}
-
-	/**
-	 * Check if a given config section should be replaced
-	 *
-	 * @param string $sConfigSection
-	 * @return bool
-	 */
-	public function replaceSection($sConfigSection) {
-		return Mage::getStoreConfigFlag('b2bprofessional/'.$sConfigSection.'/replace');
-	}
-
-	/**
-	 * Build two arrays,
-	 *  - one for patterns
-	 *  - one for replacements,
-	 * Using these two array call to replace the patterns when the cart is invalid
-	 *
-	 * @param array $aSections
-	 * @param string $sHtml
-	 * @param int $iProductId
-	 * @return string
-	 */
-	public function replaceSections($aSections, $sHtml, $iProductId = null) {
-		$aPatterns = array();
-		$aReplacements = array();
-		/*
-		 * Foreach section to replace
-		 *  - add the pattern
-		 *  - add the replacement
-		 */
-		foreach($aSections as $sReplaceSection) {
-			if($this->replaceSection($sReplaceSection)) {
-				$aPatterns[] = $this->getPattern($sReplaceSection);
-				$aReplacements[] = $this->getReplacement($sReplaceSection);
-			}
-		}
-		return $this->replaceOnInvalidCart($aPatterns, $aReplacements, $sHtml, $iProductId);
 	}
 }
