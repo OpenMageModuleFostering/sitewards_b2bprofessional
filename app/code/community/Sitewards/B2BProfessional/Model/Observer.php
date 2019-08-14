@@ -47,33 +47,6 @@ class Sitewards_B2BProfessional_Model_Observer
     }
 
     /**
-     * This will cover the case where the event 'catalog_product_is_salable_after' has not been called yet
-     *  - In the same data provided by magento the "swiss-movement-sports-watch" causes this issue
-     *
-     * @param Varien_Event_Observer $oObserver
-     */
-    public function catalogProductLoadAfter(Varien_Event_Observer $oObserver)
-    {
-        if ($this->isExtensionActive()) {
-            $this->setSalable($oObserver);
-        }
-    }
-
-    /**
-     * Check to see if a product can be sold to the current logged in user
-     *  - if the flag of salable is already false then we should do nothing
-     *
-     * @param Varien_Event_Observer $oObserver
-     */
-    public function catalogProductIsSalableAfter(Varien_Event_Observer $oObserver)
-    {
-        if ($this->isExtensionActive()) {
-            $this->setSalable($oObserver);
-            $this->setSalable($oObserver, 'salable');
-        }
-    }
-
-    /**
      * Check to see if the product being added to the cart can be bought
      *
      * @param Varien_Event_Observer $oObserver
@@ -106,6 +79,13 @@ class Sitewards_B2BProfessional_Model_Observer
              */
             if ($this->isExactlyPriceBlock($oBlock)) {
                 $this->transformPriceBlock($oBlock, $oTransport);
+            }
+
+            /**
+             * Check to see if we should remove the add-to-cart button
+             */
+            if ($this->isExactlyAddToCartBlock($oBlock)) {
+                $oTransport->setHtml('');
             }
         }
     }
@@ -171,6 +151,24 @@ class Sitewards_B2BProfessional_Model_Observer
     }
 
     /**
+     * Checks if the product can be added to the cart and if not, adds a dummy required
+     * option in order to replace the add-to-cart button's url with the view-details url
+     *
+     * @param Varien_Event_Observer $oObserver
+     */
+    public function sitewardsB2bprofessionalProductListCollectionLoadAfter(Varien_Event_Observer $oObserver)
+    {
+        $oProductCollection = $oObserver->getProductCollection();
+        $oDummyOption       = Mage::getModel('catalog/product_option');
+        foreach ($oProductCollection as $oProduct) {
+            if ($this->oB2BHelper->isProductActive($oProduct) === false) {
+                $oProduct->setRequiredOptions(array($oDummyOption));
+            }
+        }
+        return $oProductCollection;
+    }
+
+    /**
      * checks if the block represents a price block
      *
      * @param Mage_Core_Block_Abstract $oBlock
@@ -179,6 +177,17 @@ class Sitewards_B2BProfessional_Model_Observer
     protected function isExactlyPriceBlock($oBlock)
     {
         return $oBlock && $this->oB2BHelper->isBlockPriceBlock($oBlock);
+    }
+
+    /**
+     * checks if the block represents an add-to-cart block
+     *
+     * @param Mage_Core_Block_Abstract $oBlock
+     * @return bool
+     */
+    protected function isExactlyAddToCartBlock($oBlock)
+    {
+        return $this->oB2BHelper->isAddToCartBlockAndHidden($oBlock);
     }
 
     /**
@@ -298,20 +307,5 @@ class Sitewards_B2BProfessional_Model_Observer
     protected function getEventsProduct(Varien_Event_Observer $oObserver)
     {
         return $oObserver->getProduct();
-    }
-
-    /**
-     * Set the salable data on a given object
-     *
-     * @param Varien_Event_Observer $oObserver
-     * @param string $sObjectName
-     */
-    protected function setSalable(Varien_Event_Observer $oObserver, $sObjectName = 'product')
-    {
-        $oProduct = $this->getEventsProduct($oObserver);
-        $oObject  = $oObserver->getData($sObjectName);
-        if ($oObject !== null && $oObject->getIsSalable() == true) {
-            $oObject->setIsSalable($this->oB2BHelper->isProductActive($oProduct));
-        }
     }
 }

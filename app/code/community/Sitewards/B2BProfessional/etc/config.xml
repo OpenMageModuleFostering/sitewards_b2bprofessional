@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Sitewards_B2BProfessional>
-            <version>3.0.2</version>
+            <version>3.0.4</version>
         </Sitewards_B2BProfessional>
     </modules>
     <global>
@@ -16,27 +16,16 @@
                 <class>Sitewards_B2BProfessional_Helper</class>
             </sitewards_b2bprofessional>
         </helpers>
+        <blocks>
+            <catalog>
+                <rewrite>
+                    <product_list>Sitewards_B2BProfessional_Block_Catalog_Product_List</product_list>
+                </rewrite>
+            </catalog>
+        </blocks>
     </global>
     <frontend>
         <events>
-            <catalog_product_load_after>
-                <observers>
-                    <sitewards_b2bprofessional>
-                        <type>singleton</type>
-                        <class>sitewards_b2bprofessional/observer</class>
-                        <method>catalogProductLoadAfter</method>
-                    </sitewards_b2bprofessional>
-                </observers>
-            </catalog_product_load_after>
-            <catalog_product_is_salable_after>
-                <observers>
-                    <sitewards_b2bprofessional>
-                        <type>singleton</type>
-                        <class>sitewards_b2bprofessional/observer</class>
-                        <method>catalogProductIsSalableAfter</method>
-                    </sitewards_b2bprofessional>
-                </observers>
-            </catalog_product_is_salable_after>
             <catalog_product_type_prepare_full_options>
                 <observers>
                     <sitewards_b2bprofessional>
@@ -82,8 +71,37 @@
                     </sitewards_b2bprofessional>
                 </observers>
             </controller_action_predispatch>
+            <sitewards_b2bprofessional_product_list_collection_load_after>
+                <observers>
+                    <sitewards_b2bprofessional>
+                        <type>singleton</type>
+                        <class>sitewards_b2bprofessional/observer</class>
+                        <method>sitewardsB2bprofessionalProductListCollectionLoadAfter</method>
+                    </sitewards_b2bprofessional>
+                </observers>
+            </sitewards_b2bprofessional_product_list_collection_load_after>
         </events>
+        <translate>
+            <modules>
+                <Sitewards_B2BProfessional>
+                    <files>
+                        <default>Sitewards_B2BProfessional.csv</default>
+                    </files>
+                </Sitewards_B2BProfessional>
+            </modules>
+        </translate>
     </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Sitewards_B2BProfessional>
+                    <files>
+                        <default>Sitewards_B2BProfessional.csv</default>
+                    </files>
+                </Sitewards_B2BProfessional>
+            </modules>
+        </translate>
+    </adminhtml>
     <default>
         <b2bprofessional>
             <generalsettings>
