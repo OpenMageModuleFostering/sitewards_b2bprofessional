@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Sitewards_B2BProfessional",
+    "type": "magento-module",
+    "license": "GPL",
+    "homepage": "",
+    "description": "The Sitewards B2B Extension extends your webshop with some essential functions to realize a B2B Store.",
+    "authors": [
+    {
+        "name": "Sitewards Magento Team",
+        "email": "magento@sitewards.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

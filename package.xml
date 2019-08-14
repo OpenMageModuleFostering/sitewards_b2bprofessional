@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+    <name>Sitewards_B2BProfessional</name>
+    <version>2.0.3</version>
+    <stability>stable</stability>
+    <license uri="http://www.opensource.org/licenses/gpl-license.php">GPL</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>The Sitewards B2B Extension extends your webshop with some essential functions to realize a B2B Store.</summary>
+    <description>The Sitewards B2B Extension extends your webshop with some essential functions to realize a business-to-business store. Product prices and add-to-cart functions are only available for registered customer accounts that were approved by the site administrator. All other product details remain visible for non-registered users.&#xD;
+&#xD;
+Features of the B2BProfessional Extension:&#xD;
+&#xB7; Customers can register, but have to be approved to see product prices and to order products&#xD;
+&#xB7; Prices of all product types and options are only visible for approved customers&#xD;
+&#xB7; Consequently, the Shopping Cart and Checkout are only available for approved customers&#xD;
+&#xB7; Multi-store: The extension can be activated for each store/view separately&#xD;
+&#xB7; Create both, B2B and B2C stores in one Magento installation&#xD;
+&#xB7; Optional info message (e.g. &#x201D;Please login to see price &#x201D;) in place of price&#xD;
+&#xB7; Multilanguage support (German and English installed, extendible to other languages)&#xD;
+&#xB7; Activation for specific product categories&#xD;
+&#xB7; Activation for specific customer groups&#xD;
+&#xB7; Optional require login to access store</description>
+    <notes>Fix issue where user created via the admin section would not show prices.</notes>
+    <authors><author><name>Sitewards Magento Team</name><user>sitewards</user><email>magento@sitewards.com</email></author></authors>
+    <date>2013-03-14</date>
+    <time>15:19:33</time>
+    <contents><target name="magecommunity"><dir name="Sitewards"><dir name="B2BProfessional"><dir name="Block"><dir name="Bundle"><dir name="Catalog"><file name="Price.php" hash="29947f4d2db1edb62d31ab2bb26d5612"/><dir name="Product"><dir name="View"><dir name="Type"><dir name="Bundle"><dir name="Option"><file name="Checkbox.php" hash="97e3e7ce97a873c0bf438dcbb9d63538"/><file name="Multi.php" hash="aade197dae894c11df15ded6b90c5fa6"/><file name="Radio.php" hash="6bae85356183c20b8f7327018f4939fe"/><file name="Select.php" hash="b90a778084796edf552d6c87e888404f"/></dir></dir></dir></dir></dir></dir></dir><file name="Price.php" hash="1826b3c8059e2925a9e2459aab26060c"/><dir name="Product"><dir name="View"><dir name="Options"><dir name="Type"><file name="Select.php" hash="01e9eb71f9c35a00fc39e375e2335301"/></dir></dir><dir name="Type"><file name="Configurable.php" hash="03aca82552c1cba03b1b243762bd95ad"/></dir></dir></dir></dir><dir name="Helper"><file name="Data.php" hash="f24219cd6209910b2eb47775a6e8895c"/></dir><dir name="Model"><file name="Customer.php" hash="965cddbd586db90e693e7cef0bfba762"/><dir name="System"><dir name="Config"><dir name="Source"><file name="Category.php" hash="115526ef80ee1f799e0c68f81a45fc9f"/></dir></dir></dir></dir><dir name="controllers"><file name="CartController.php" hash="6dfb9530a9361dd2636ce5229369de3c"/></dir><dir name="etc"><file name="adminhtml.xml" hash="4532de80b3439c3047ea70776b8420a5"/><file name="config.xml" hash="34ad5f2813dad74afa6c609a49dba565"/><file name="system.xml" hash="f5e551776e65e8079280349ec65261e3"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Sitewards_B2BProfessional.xml" hash="3eb7e7a0f796d39faf60cf3f30c40ff2"/></dir></target><target name="magelocale"><dir name="de_DE"><file name="Sitewards_B2BProfessional.csv" hash="3b2c1c96558ba09f119f40c69ce7e353"/></dir><dir name="en_US"><file name="Sitewards_B2BProfessional.csv" hash="79a587f13911889839f6aeb93693d0b6"/></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php><package><name>Netzarbeiter_CustomerActivation</name><channel>community</channel><min>0.3.0</min><max>0.4.1</max></package></required></dependencies>
+</package>
